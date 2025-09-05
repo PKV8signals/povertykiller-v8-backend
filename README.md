@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// Root route (when you visit the Render link)
+// Root route
 app.get("/", (req, res) => {
   res.send("✅ PovertyKiller V8 Backend is running!");
 });
