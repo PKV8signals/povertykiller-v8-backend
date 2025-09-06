@@ -10,8 +10,7 @@
     "express": "^4.19.2",
     "better-sqlite3": "^9.4.1",
     "firebase-admin": "^11.10.1",
-    "dotenv": "^16.4.5",
-    "ta-lib": "^0.6.1"
+    "dotenv": "^16.4.5"
   },
   "license": "MIT"
 }
