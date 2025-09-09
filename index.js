@@ -1,13 +1,11 @@
-// index.js - Minimal test backend
 const express = require('express');
 const app = express();
-
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 app.get('/', (req, res) => {
-  res.send('✅ Poverty Killer V8 Backend is running (test mode)');
+  res.send('✅ Poverty Killer V8 Backend is running (local test)');
 });
 
 app.listen(PORT, () => {
-  console.log(Server running on port ${PORT});
+  console.log(`Server running at http://localhost:${PORT}`);
 });
