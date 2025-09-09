@@ -1,16 +1,11 @@
 {
   "name": "povertykiller-v8-backend",
   "version": "1.0.0",
-  "description": "Trading signals backend with Firebase integration",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "better-sqlite3": "^9.4.1",
-    "firebase-admin": "^11.10.1",
-    "dotenv": "^16.4.5"
-  },
-  "license": "MIT"
+    "express": "^4.19.2"
+  }
 }
