@@ -1,53 +1,58 @@
-const express = require("express");
+// index.js - Poverty Killer V8 Backend with Strategies
+require('dotenv').config();
+const express = require('express');
+const Database = require('better-sqlite3');
 const app = express();
+
 const PORT = process.env.PORT || 10000;
 
+// SQLite database
+const db = new Database('signals.db');
+
+// Create signals table if not exists
+db.prepare(`
+  CREATE TABLE IF NOT EXISTS signals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    type TEXT,
+    pair TEXT,
+    action TEXT,
+    price REAL,
+    created_at TEXT
+  )
+`).run();
+
 // Root route
-app.get("/", (req, res) => {
-  res.send("✅ Poverty Killer V8 Backend is running");
+app.get('/', (req, res) => {
+  res.send('✅ Poverty Killer V8 Backend is running!');
 });
 
-// Signals route (static test data for now)
-app.get("/signals", (req, res) => {
-  const signals = [
-    {
-      asset: "EUR/USD",
-      type: "BUY",
-      entry: 1.0870,
-      stopLoss: 1.0830,
-      takeProfit: 1.0930,
-      strategy: "RSI + EMA + MACD + SMC"
-    },
-    {
-      asset: "XAU/USD (Gold)",
-      type: "SELL",
-      entry: 1930.5,
-      stopLoss: 1938.0,
-      takeProfit: 1915.0,
-      strategy: "EMA + MACD + SMC"
-    },
-    {
-      asset: "BTC/USD",
-      type: "BUY",
-      entry: 27000,
-      stopLoss: 26500,
-      takeProfit: 28000,
-      strategy: "RSI + EMA"
-    },
-    {
-      asset: "US30 (Dow Jones)",
-      type: "SELL",
-      entry: 34700,
-      stopLoss: 34900,
-      takeProfit: 34400,
-      strategy: "RSI + SMC"
-    }
-  ];
+// Get latest signals
+app.get('/api/signals', (req, res) => {
+  try {
+    const signals = db.prepare(
+      'SELECT * FROM signals ORDER BY created_at DESC LIMIT 20'
+    ).all();
+    res.json(signals);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error retrieving signals');
+  }
+});
 
-  res.json({ status: "success", signals });
+// Create a test signal
+app.post('/api/test-signal', (req, res) => {
+  try {
+    db.prepare(
+      'INSERT INTO signals (type, pair, action, price, created_at) VALUES (?, ?, ?, ?, datetime("now"))'
+    ).run('forex', 'EUR/USD', 'BUY', 1.2345);
+    res.send('Test signal added successfully!');
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Error adding signal');
+  }
 });
 
 // Start server
 app.listen(PORT, () => {
-  console.log(Server running on port ${PORT});
+  console.log(`✅ Server running on port ${PORT}`);
 });
