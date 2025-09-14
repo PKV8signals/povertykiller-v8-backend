@@ -1,58 +1,48 @@
-// index.js - Poverty Killer V8 Backend with Strategies
-require('dotenv').config();
-const express = require('express');
-const Database = require('better-sqlite3');
+const express = require("express");
+const technicalindicators = require("technicalindicators");
+
 const app = express();
+const PORT = process.env.PORT || 3000;
 
-const PORT = process.env.PORT || 10000;
+// Dummy price data (later we can fetch from broker APIs)
+const candles = [1.1000, 1.1010, 1.0990, 1.1020, 1.1040, 1.1030, 1.1060, 1.1050, 1.1070, 1.1080];
 
-// SQLite database
-const db = new Database('signals.db');
+// RSI
+const rsi = new technicalindicators.RSI({ values: candles, period: 14 }).slice(-1)[0];
 
-// Create signals table if not exists
-db.prepare(`
-  CREATE TABLE IF NOT EXISTS signals (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    type TEXT,
-    pair TEXT,
-    action TEXT,
-    price REAL,
-    created_at TEXT
-  )
-`).run();
+// EMA
+const emaFast = new technicalindicators.EMA({ values: candles, period: 9 }).slice(-1)[0];
+const emaSlow = new technicalindicators.EMA({ values: candles, period: 21 }).slice(-1)[0];
 
-// Root route
-app.get('/', (req, res) => {
-  res.send('✅ Poverty Killer V8 Backend is running!');
+// MACD
+const macd = new technicalindicators.MACD({
+  values: candles,
+  fastPeriod: 12,
+  slowPeriod: 26,
+  signalPeriod: 9,
+  SimpleMAOscillator: false,
+  SimpleMASignal: false,
+}).slice(-1)[0];
+
+// Generate a signal
+let signal = "HOLD";
+if (rsi < 30 && emaFast > emaSlow && macd.MACD > macd.signal) {
+  signal = "BUY";
+} else if (rsi > 70 && emaFast < emaSlow && macd.MACD < macd.signal) {
+  signal = "SELL";
+}
+
+app.get("/signal", (req, res) => {
+  res.json({
+    pair: "EURUSD",
+    signal,
+    entry: candles[candles.length - 1],
+    tp1: candles[candles.length - 1] + (signal === "BUY" ? 0.0050 : -0.0050),
+    tp2: candles[candles.length - 1] + (signal === "BUY" ? 0.0100 : -0.0100),
+    sl: candles[candles.length - 1] + (signal === "BUY" ? -0.0050 : 0.0050),
+    indicators: { rsi, emaFast, emaSlow, macd },
+    timeframe: "15m",
+  });
 });
 
-// Get latest signals
-app.get('/api/signals', (req, res) => {
-  try {
-    const signals = db.prepare(
-      'SELECT * FROM signals ORDER BY created_at DESC LIMIT 20'
-    ).all();
-    res.json(signals);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error retrieving signals');
-  }
-});
-
-// Create a test signal
-app.post('/api/test-signal', (req, res) => {
-  try {
-    db.prepare(
-      'INSERT INTO signals (type, pair, action, price, created_at) VALUES (?, ?, ?, ?, datetime("now"))'
-    ).run('forex', 'EUR/USD', 'BUY', 1.2345);
-    res.send('Test signal added successfully!');
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error adding signal');
-  }
-});
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(✅ Poverty Killer V8 Backend running on port ${PORT}));
