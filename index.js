@@ -1,25 +1,26 @@
 const express = require("express");
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 3000;
 
 // Root route
 app.get("/", (req, res) => {
-  res.send("✅ PKV8 Backend is running successfully!");
+  res.send("✅ Poverty Killer V8 Backend is running!");
 });
 
-// Example test signal
-app.get("/api/signal", (req, res) => {
+// Example signal route
+app.get("/signal", (req, res) => {
   res.json({
-    asset: "XAUUSD",
-    signal: "SELL",
-    entry: 1945.50,
-    tp1: 1940.00,
-    tp2: 1935.00,
-    sl: 1950.00,
+    pair: "EURUSD",
+    signal: "BUY",
+    entry: 1.1080,
+    tp1: 1.1130,
+    tp2: 1.1180,
+    sl: 1.1030,
     timeframe: "15m"
   });
 });
 
+// Start server
 app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });
